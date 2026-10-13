@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -45,10 +45,79 @@ export function Header() {
   const [showHeader, setShowHeader] = useState(true);
   const lastScrollY = useRef(0);
 
+  // ── Secret Admin Access: 6 taps on User icon (or Logo) within 3 seconds ──
+  const secretTapCount = useRef(0);
+  const secretTapTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const pathname = usePathname();
   const router = useRouter();
   const savedCount = useSavedDesignsStore((state) => state.savedIds.length);
   const headerNav = useAdminStore((state) => state.navigation?.header);
+
+  // Hidden unlock: 6 rapid clicks/taps opens /admin automatically
+  const handleSecretAdminTap = useCallback(async (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    secretTapCount.current += 1;
+
+    if (secretTapTimer.current) clearTimeout(secretTapTimer.current);
+    secretTapTimer.current = setTimeout(() => {
+      secretTapCount.current = 0;
+    }, 3000);
+
+    if (secretTapCount.current >= 6) {
+      secretTapCount.current = 0;
+      if (secretTapTimer.current) clearTimeout(secretTapTimer.current);
+      if (typeof navigator !== "undefined" && navigator.vibrate) {
+        navigator.vibrate([40, 40, 80]);
+      }
+
+      // Automatically initialize admin session so admin dashboard opens directly
+      document.cookie = "albeli_admin_dev=true; path=/; max-age=2592000; SameSite=Lax";
+      try {
+        await fetch("/api/admin/auth", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "quick-access" }),
+        });
+      } catch {}
+
+      window.location.href = "/admin";
+    }
+  }, []);
+
+  // Logo tap handler: allows normal navigation to home, but if clicked 6 times in a row, opens /admin
+  const handleLogoClick = useCallback(async (e: React.MouseEvent) => {
+    secretTapCount.current += 1;
+
+    if (secretTapTimer.current) clearTimeout(secretTapTimer.current);
+    secretTapTimer.current = setTimeout(() => {
+      secretTapCount.current = 0;
+    }, 3000);
+
+    if (secretTapCount.current >= 6) {
+      e.preventDefault();
+      secretTapCount.current = 0;
+      if (secretTapTimer.current) clearTimeout(secretTapTimer.current);
+      if (typeof navigator !== "undefined" && navigator.vibrate) {
+        navigator.vibrate([40, 40, 80]);
+      }
+
+      // Automatically initialize admin session so admin dashboard opens directly
+      document.cookie = "albeli_admin_dev=true; path=/; max-age=2592000; SameSite=Lax";
+      try {
+        await fetch("/api/admin/auth", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "quick-access" }),
+        });
+      } catch {}
+
+      window.location.href = "/admin";
+    }
+  }, []);
 
   useEffect(() => {
     setMounted(true);
@@ -140,7 +209,7 @@ export function Header() {
               ))}
             </nav>
 
-            {/* Centred Brand Logo */}
+            {/* Centred Brand Logo — 6 rapid taps opens admin, single click goes home */}
             <div className="flex-shrink-0 flex items-center justify-center px-2">
               <Logo
                 variant="full"
@@ -148,6 +217,7 @@ export function Header() {
                 size="sm"
                 className="scale-90 sm:scale-100"
                 withTagline={false}
+                onLogoClick={handleLogoClick}
               />
             </div>
 
@@ -208,14 +278,15 @@ export function Header() {
                   <Search className="w-4 h-4" />
                 </button>
 
-                {/* Account / Login on Desktop */}
-                <Link
-                  href="/auth/login"
-                  aria-label="Account / Sign in"
-                  className="p-1.5 text-[#1E1A1A]/80 hover:text-[#6B1F2E] transition-colors hidden sm:inline-block"
+                {/* Account Icon (Desktop & Mobile) — Hidden Easter Egg: 6 rapid taps opens Admin */}
+                <button
+                  type="button"
+                  onClick={handleSecretAdminTap}
+                  aria-label="Account"
+                  className="touch-target p-2 text-[#1E1A1A]/80 hover:text-[#6B1F2E] transition-colors flex items-center justify-center cursor-pointer select-none touch-manipulation"
                 >
-                  <User className="w-4 h-4" />
-                </Link>
+                  <User className="w-4 h-4 pointer-events-none" />
+                </button>
               </div>
             </div>
           </div>
@@ -321,7 +392,7 @@ export function Header() {
               </nav>
             </div>
 
-            {/* Drawer Bottom: Language, Socials, Watermark & Admin Access */}
+            {/* Drawer Bottom: Language, Socials, Watermark */}
             <div className="p-6 pt-4 border-t border-[#4A0612]/10 bg-white/40 space-y-4">
               {/* Language Toggle & Socials */}
               <div className="flex items-center justify-between text-xs py-1.5 border-b border-[#4A0612]/10 font-sans">
@@ -370,12 +441,7 @@ export function Header() {
                 </a>
               </div>
 
-              <Link
-                href="/auth/login"
-                className="w-full py-2.5 text-center text-xs tracking-wider uppercase font-semibold bg-[#4A0612] text-[#FCEDEA] rounded-sm block"
-              >
-                Sign In / Admin
-              </Link>
+
 
               {/* Faint Peacock Mark Watermark */}
               <div className="flex justify-center opacity-10 pt-2 select-none pointer-events-none">

@@ -233,7 +233,7 @@ export function Footer() {
         </div>
       </div>
 
-      {/* Bottom Bar with Discreet Admin Link */}
+      {/* Bottom Bar: Copyright & Legal */}
       <div className="border-t border-[#6B1F2E]/30 py-6 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between text-[11px] text-[#F1DFD8]/50 space-y-3 sm:space-y-0">
           <p>© {currentYear} ALBELI. All rights reserved.</p>
@@ -244,13 +244,6 @@ export function Footer() {
             </Link>
             <Link href="/terms" className="hover:text-[#F1DFD8] transition-colors">
               Terms
-            </Link>
-            {/* Discreet Admin link for store owners */}
-            <Link
-              href="/admin"
-              className="text-[#F1DFD8]/40 hover:text-[#F1DFD8] transition-colors cursor-pointer"
-            >
-              Admin Portal
             </Link>
           </div>
         </div>

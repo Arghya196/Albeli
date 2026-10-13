@@ -9,6 +9,8 @@ interface LogoProps {
   className?: string;
   asLink?: boolean;
   withTagline?: boolean;
+  /** Optional click handler — used for hidden admin tap-to-unlock */
+  onLogoClick?: (e: React.MouseEvent) => void;
 }
 
 const sizeClasses = {
@@ -39,6 +41,7 @@ export function Logo({
   className,
   asLink = true,
   withTagline = false,
+  onLogoClick,
 }: LogoProps) {
   // Select appropriate SVG file based on variant and theme (light = for dark bg, dark = for light bg)
   let src = "/brand/logo-transparent-dark.svg";
@@ -80,11 +83,25 @@ export function Logo({
     return (
       <Link
         href="/"
+        onClick={onLogoClick}
         className="inline-flex items-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-maroon/50 rounded-sm"
         aria-label="Albeli Home"
       >
         {content}
       </Link>
+    );
+  }
+
+  if (onLogoClick) {
+    return (
+      <button
+        type="button"
+        onClick={onLogoClick}
+        className="inline-flex items-center cursor-pointer focus-visible:outline-none"
+        aria-label="Albeli"
+      >
+        {content}
+      </button>
     );
   }
 
