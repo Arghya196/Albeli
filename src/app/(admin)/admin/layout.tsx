@@ -42,6 +42,21 @@ export default function AdminLayout({
 
   const [moreSheetOpen, setMoreSheetOpen] = useState(false);
 
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/admin/auth", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "logout" }),
+      });
+      document.cookie = "albeli_admin_dev=; path=/; max-age=0";
+      document.cookie = "albeli_admin_session=; path=/; max-age=0";
+    } catch (e) {
+      console.error(e);
+    }
+    window.location.href = "/auth/login";
+  };
+
   return (
     <div className="min-h-screen bg-[#FBF6EE] flex text-[#1E1A1A] select-none">
       {/* Desktop Sidebar */}
@@ -50,7 +65,7 @@ export default function AdminLayout({
         <div className="p-6 border-b border-[#4A0612]/10 flex flex-col items-start gap-2">
           <Logo variant="full" theme="dark" size="sm" asLink={false} />
           <div className="flex items-center gap-1.5 px-2 py-0.5 bg-[#4A0612]/5 text-[#6B1F2E] rounded-xs text-[10px] font-sans font-semibold uppercase tracking-wider">
-            <ShieldCheck className="w-3 h-3 text-[#6B1F2E]" />
+            <ShieldCheck className="w-3.5 h-3.5 text-[#6B1F2E]" />
             <span>Admin Console</span>
           </div>
         </div>
@@ -95,12 +110,16 @@ export default function AdminLayout({
             <span className="text-[10px] font-mono text-[#1E1A1A]/40">↗</span>
           </Link>
 
-          <div className="pt-2 flex items-center justify-between text-[11px] text-[#1E1A1A]/50 px-3">
-            <span>Role: Owner (Dev)</span>
-            <Link href="/" className="hover:text-[#6B1F2E]">
-              Exit
-            </Link>
-          </div>
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center justify-between px-3 py-2 text-xs font-sans text-red-700/80 hover:text-red-700 hover:bg-red-50 rounded-sm transition-colors cursor-pointer"
+          >
+            <span className="flex items-center gap-2">
+              <LogOut className="w-3.5 h-3.5" />
+              <span>Sign Out</span>
+            </span>
+            <span className="text-[10px] font-mono opacity-50">Admin</span>
+          </button>
         </div>
       </aside>
 
@@ -147,13 +166,19 @@ export default function AdminLayout({
               </nav>
             </div>
 
-            <div className="pt-6 border-t border-[#4A0612]/10">
+            <div className="pt-6 border-t border-[#4A0612]/10 space-y-2">
               <Link
                 href="/"
                 className="block text-center py-2.5 bg-[#4A0612] text-[#FCEDEA] text-xs font-semibold uppercase tracking-wider rounded-sm"
               >
                 View Storefront
               </Link>
+              <button
+                onClick={handleLogout}
+                className="w-full py-2 bg-red-50 text-red-700 border border-red-200 text-xs font-semibold uppercase tracking-wider rounded-sm cursor-pointer"
+              >
+                Sign Out Admin
+              </button>
             </div>
           </div>
         </div>
