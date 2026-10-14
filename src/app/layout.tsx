@@ -69,11 +69,16 @@ export const metadata: Metadata = {
   manifest: "/manifest.webmanifest",
   icons: {
     icon: [
-      { url: "/favicon.ico", sizes: "any" },
-      { url: "/icon.png", type: "image/png", sizes: "512x512" },
+      { url: "/icon-32x32.png?v=3", type: "image/png", sizes: "32x32" },
+      { url: "/icon-16x16.png?v=3", type: "image/png", sizes: "16x16" },
+      { url: "/icon-48x48.png?v=3", type: "image/png", sizes: "48x48" },
+      { url: "/icon-192x192.png?v=3", type: "image/png", sizes: "192x192" },
+      { url: "/icon.png?v=3", type: "image/png", sizes: "512x512" },
+      { url: "/favicon.ico?v=3", sizes: "any" },
     ],
+    shortcut: "/favicon.ico?v=3",
     apple: [
-      { url: "/apple-icon.png", sizes: "180x180", type: "image/png" },
+      { url: "/apple-icon.png?v=3", sizes: "180x180", type: "image/png" },
     ],
   },
 };
@@ -146,6 +151,12 @@ export default function RootLayout({
           as="image"
           type="image/png"
         />
+
+        {/* Immediate Favicons & Cache Busting */}
+        <link rel="icon" type="image/png" sizes="32x32" href="/icon-32x32.png?v=3" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/icon-16x16.png?v=3" />
+        <link rel="shortcut icon" href="/favicon.ico?v=3" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-icon.png?v=3" />
       </head>
       <body className="min-h-full flex flex-col">
         {children}
