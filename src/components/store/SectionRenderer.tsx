@@ -112,37 +112,37 @@ export function SectionRenderer() {
 
   return (
     <div className="w-full space-y-12 sm:space-y-24 pb-16 sm:pb-20 overflow-x-clip">
-      {/* ── 1. Hero Banner (Animated Auto-Slider, Swipeable, Admin Configurable) ── */}
-      <section className="relative w-full overflow-hidden bg-[#FBF6EE] pt-2 sm:pt-6 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div
-            onTouchStart={handleHeroTouchStart}
-            onTouchEnd={handleHeroTouchEnd}
-            onMouseEnter={() => setIsHeroHovered(true)}
-            onMouseLeave={() => setIsHeroHovered(false)}
-            className="group relative rounded-t-[32px] sm:rounded-sm overflow-hidden bg-[#4A0612] text-[#FCEDEA] aspect-[4/5] sm:aspect-auto sm:min-h-[580px] flex flex-col justify-end sm:justify-center p-6 sm:p-12 lg:p-16 shadow-lg select-none"
-          >
-            {/* Animated Background Campaign Image with framer-motion */}
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={currentSlide.id || `slide-${heroIdx}`}
-                initial={{ opacity: 0, scale: 1.04 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.75, ease: [0.22, 1, 0.36, 1] }}
-                className="absolute inset-0 z-0"
-              >
-                <img
-                  src={currentSlide.image}
-                  alt={currentSlide.headline}
-                  className="w-full h-full object-cover object-top sm:object-center opacity-90"
-                />
-                {/* Gradient overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t sm:bg-gradient-to-r from-[#4A0612]/95 via-[#4A0612]/65 to-transparent" />
-              </motion.div>
-            </AnimatePresence>
+      {/* ── 1. Hero Banner (Full-Bleed Edge-to-Edge Slider) ── */}
+      <section className="relative w-full overflow-hidden bg-[#FBF6EE]">
+        <div
+          onTouchStart={handleHeroTouchStart}
+          onTouchEnd={handleHeroTouchEnd}
+          onMouseEnter={() => setIsHeroHovered(true)}
+          onMouseLeave={() => setIsHeroHovered(false)}
+          className="group relative w-full overflow-hidden bg-[#4A0612] text-[#FCEDEA] aspect-[4/5] sm:aspect-[21/9] sm:min-h-[500px] lg:min-h-[580px] flex flex-col justify-end sm:justify-center p-6 sm:p-14 lg:p-20 select-none"
+        >
+          {/* Animated Background Campaign Image with framer-motion */}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentSlide.id || `slide-${heroIdx}`}
+              initial={{ opacity: 0, scale: 1.04 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.75, ease: [0.22, 1, 0.36, 1] }}
+              className="absolute inset-0 z-0"
+            >
+              <img
+                src={currentSlide.image}
+                alt={currentSlide.headline}
+                className="w-full h-full object-cover object-top sm:object-center opacity-90"
+              />
+              {/* Gradient overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t sm:bg-gradient-to-r from-[#4A0612]/95 via-[#4A0612]/65 to-transparent" />
+            </motion.div>
+          </AnimatePresence>
 
-            {/* Overlaid Animated Headline & Copy */}
+          {/* Overlaid Animated Headline & Copy */}
+          <div className="relative z-10 max-w-7xl mx-auto w-full">
             <AnimatePresence mode="wait">
               <motion.div
                 key={`text-${currentSlide.id || heroIdx}`}
@@ -150,7 +150,7 @@ export function SectionRenderer() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-                className="relative z-10 max-w-lg"
+                className="max-w-lg"
               >
                 {currentSlide.badge && (
                   <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-[#6B1F2E]/85 backdrop-blur-xs rounded-full border border-[#FCEDEA]/20 text-[10px] sm:text-[11px] font-sans uppercase tracking-[0.2em] text-[#FCEDEA] mb-2 sm:mb-4">
@@ -193,48 +193,46 @@ export function SectionRenderer() {
                 </div>
               </motion.div>
             </AnimatePresence>
-
-            {/* Desktop Left/Right Navigation Arrows */}
-            {slides.length > 1 && (
-              <div className="hidden sm:flex absolute inset-y-0 right-8 z-20 items-center gap-2 pointer-events-none">
-                <div className="flex items-center gap-2 pointer-events-auto opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <button
-                    onClick={prevHero}
-                    aria-label="Previous slide"
-                    className="w-10 h-10 rounded-full bg-black/40 hover:bg-black/70 backdrop-blur-xs text-[#FCEDEA] flex items-center justify-center border border-white/20 transition-all active:scale-95"
-                  >
-                    <ChevronLeft className="w-5 h-5" />
-                  </button>
-                  <button
-                    onClick={nextHero}
-                    aria-label="Next slide"
-                    className="w-10 h-10 rounded-full bg-black/40 hover:bg-black/70 backdrop-blur-xs text-[#FCEDEA] flex items-center justify-center border border-white/20 transition-all active:scale-95"
-                  >
-                    <ChevronRight className="w-5 h-5" />
-                  </button>
-                </div>
-              </div>
-            )}
           </div>
 
-          {/* Dash Pagination Beneath Hero Banner */}
+          {/* Left & Right Navigation Arrows (Positioned at banner sides like the screenshot) */}
           {slides.length > 1 && (
-            <div className="flex items-center justify-center gap-2 pt-3">
-              {slides.map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => setHeroIdx(i)}
-                  aria-label={`Go to slide ${i + 1}`}
-                  className={`h-1.5 rounded-full transition-all duration-300 ${
-                    heroIdx === i
-                      ? "w-8 bg-[#4A0612]"
-                      : "w-2.5 bg-[#4A0612]/20 hover:bg-[#4A0612]/40"
-                  }`}
-                />
-              ))}
-            </div>
+            <>
+              <button
+                onClick={prevHero}
+                aria-label="Previous slide"
+                className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 z-20 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-black/40 hover:bg-black/75 backdrop-blur-sm text-white flex items-center justify-center border border-white/20 transition-all duration-200 active:scale-95 shadow-lg cursor-pointer"
+              >
+                <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
+              </button>
+              <button
+                onClick={nextHero}
+                aria-label="Next slide"
+                className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 z-20 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-black/40 hover:bg-black/75 backdrop-blur-sm text-white flex items-center justify-center border border-white/20 transition-all duration-200 active:scale-95 shadow-lg cursor-pointer"
+              >
+                <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
+              </button>
+            </>
           )}
         </div>
+
+        {/* Dash Pagination Beneath Hero Banner */}
+        {slides.length > 1 && (
+          <div className="flex items-center justify-center gap-2 py-4 bg-[#FBF6EE]">
+            {slides.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setHeroIdx(i)}
+                aria-label={`Go to slide ${i + 1}`}
+                className={`h-1 sm:h-1.5 rounded-full transition-all duration-300 cursor-pointer ${
+                  heroIdx === i
+                    ? "w-8 sm:w-10 bg-[#4A0612]"
+                    : "w-3 sm:w-4 bg-[#4A0612]/20 hover:bg-[#4A0612]/40"
+                }`}
+              />
+            ))}
+          </div>
+        )}
       </section>
 
       {/* ── 2. "Shop by Theme" (Phone: 1.2 Peeking Swipe Cards, Desktop: 4-Col) ── */}
