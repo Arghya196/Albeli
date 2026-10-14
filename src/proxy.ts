@@ -110,9 +110,9 @@ export const config = {
      * Match all paths except:
      * - _next/static (static files)
      * - _next/image (image optimization)
-     * - favicon.ico, sitemap.xml, robots.txt
-     * - public assets (brand/, images/)
+     * - favicon.ico, sitemap.xml, robots.txt, manifest files
+     * - public assets (brand/, images/, icon files)
      */
-    "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|brand/|images/).*)",
+    "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|manifest.webmanifest|manifest.json|icon.*|apple-icon.*|brand/|images/).*)",
   ],
 };
