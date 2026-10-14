@@ -69,16 +69,28 @@ export const metadata: Metadata = {
   manifest: "/manifest.webmanifest",
   icons: {
     icon: [
-      { url: "/icon-32x32.png?v=3", type: "image/png", sizes: "32x32" },
-      { url: "/icon-16x16.png?v=3", type: "image/png", sizes: "16x16" },
-      { url: "/icon-48x48.png?v=3", type: "image/png", sizes: "48x48" },
-      { url: "/icon-192x192.png?v=3", type: "image/png", sizes: "192x192" },
-      { url: "/icon.png?v=3", type: "image/png", sizes: "512x512" },
-      { url: "/favicon.ico?v=3", sizes: "any" },
+      { url: "/icon-32x32.png?v=4", type: "image/png", sizes: "32x32" },
+      { url: "/icon-16x16.png?v=4", type: "image/png", sizes: "16x16" },
+      { url: "/icon-48x48.png?v=4", type: "image/png", sizes: "48x48" },
+      { url: "/icon-192x192.png?v=4", type: "image/png", sizes: "192x192" },
+      { url: "/icon.png?v=4", type: "image/png", sizes: "512x512" },
+      { url: "/favicon.ico?v=4", sizes: "any" },
     ],
-    shortcut: "/favicon.ico?v=3",
+    shortcut: "/favicon.ico?v=4",
     apple: [
-      { url: "/apple-icon.png?v=3", sizes: "180x180", type: "image/png" },
+      { url: "/apple-touch-icon.png?v=4", sizes: "180x180", type: "image/png" },
+      { url: "/apple-icon.png?v=4", sizes: "180x180", type: "image/png" },
+    ],
+    other: [
+      {
+        rel: "mask-icon",
+        url: "/safari-pinned-tab.svg?v=4",
+        color: "#4A0612",
+      },
+      {
+        rel: "apple-touch-icon-precomposed",
+        url: "/apple-touch-icon-precomposed.png?v=4",
+      },
     ],
   },
 };
@@ -152,11 +164,13 @@ export default function RootLayout({
           type="image/png"
         />
 
-        {/* Immediate Favicons & Cache Busting */}
-        <link rel="icon" type="image/png" sizes="32x32" href="/icon-32x32.png?v=3" />
-        <link rel="icon" type="image/png" sizes="16x16" href="/icon-16x16.png?v=3" />
-        <link rel="shortcut icon" href="/favicon.ico?v=3" />
-        <link rel="apple-touch-icon" sizes="180x180" href="/apple-icon.png?v=3" />
+        {/* Immediate Favicons & Cache Busting (Safari & Chromium) */}
+        <link rel="icon" type="image/png" sizes="32x32" href="/icon-32x32.png?v=4" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/icon-16x16.png?v=4" />
+        <link rel="shortcut icon" href="/favicon.ico?v=4" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=4" />
+        <link rel="apple-touch-icon-precomposed" sizes="180x180" href="/apple-touch-icon-precomposed.png?v=4" />
+        <link rel="mask-icon" href="/safari-pinned-tab.svg?v=4" color="#4A0612" />
       </head>
       <body className="min-h-full flex flex-col">
         {children}
