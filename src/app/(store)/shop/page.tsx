@@ -193,15 +193,23 @@ function ShopContent() {
         </span>
         <h1 className="font-display text-3xl sm:text-5xl text-[#1E1A1A] font-normal tracking-tight mb-2">
           {currentSubcategoryObj
-            ? `${currentCategoryObj?.name || ""} ${currentSubcategoryObj.name}`
+            ? `${currentCategoryObj?.name || ""} › ${currentSubcategoryObj.name}`
             : currentCategoryObj
             ? `${currentCategoryObj.name} Collection`
             : "The Jewellery Catalogue"}
         </h1>
         <p className="font-sans text-xs sm:text-sm text-[#1E1A1A]/65 leading-relaxed">
-          {currentSubcategoryObj?.description ||
-            currentCategoryObj?.description ||
-            "Handcrafted in Delhi. Discover our limited artisan edits, created with love."}
+          {currentSubcategoryObj ? (
+            <span>
+              {currentSubcategoryObj.description ||
+                `Explore our handcrafted collection of ${currentSubcategoryObj.name}.`}{" "}
+              <span className="font-medium text-[#6B1F2E]">
+                ({filteredProducts.length} {filteredProducts.length === 1 ? "piece" : "varieties"} in stock)
+              </span>
+            </span>
+          ) : currentCategoryObj?.description || (
+            "Handcrafted in Delhi. Discover our limited artisan edits, created with love."
+          )}
         </p>
       </div>
 

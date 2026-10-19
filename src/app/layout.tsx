@@ -147,6 +147,8 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      data-scroll-behavior="smooth"
+      suppressHydrationWarning
       className={`${cormorant.variable} ${dmSans.variable} ${tiroDevanagari.variable} h-full antialiased`}
     >
       <head>

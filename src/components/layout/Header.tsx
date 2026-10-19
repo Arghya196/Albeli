@@ -80,7 +80,8 @@ export function Header() {
 
   const pathname = usePathname();
   const router = useRouter();
-  const savedCount = useSavedDesignsStore((state) => state.savedIds.length);
+  const rawSavedCount = useSavedDesignsStore((state) => state.savedIds.length);
+  const savedCount = mounted ? rawSavedCount : 0;
   const headerNav = useAdminStore((state) => state.navigation?.header);
 
   // Hidden unlock: 6 rapid clicks/taps opens /admin automatically

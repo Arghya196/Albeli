@@ -99,7 +99,7 @@ export const DEFAULT_CATEGORIES: AdminCategory[] = [
     id: "cat-1",
     name: "Earrings",
     slug: "earrings",
-    itemCount: 5,
+    itemCount: 14,
     parentId: null,
     description: "Handcrafted chandbalis, jhumkas, polki studs, and royal ear ornaments.",
     imageUrl: "/images/product-1-a.jpg",
@@ -108,7 +108,7 @@ export const DEFAULT_CATEGORIES: AdminCategory[] = [
     id: "cat-2",
     name: "Necklaces",
     slug: "necklaces",
-    itemCount: 2,
+    itemCount: 4,
     parentId: null,
     description: "Sculpted heritage haslis, polki chokers, and royal bridal neckpieces.",
     imageUrl: "/images/product-2-a.jpg",
@@ -117,7 +117,7 @@ export const DEFAULT_CATEGORIES: AdminCategory[] = [
     id: "cat-3",
     name: "Rings",
     slug: "rings",
-    itemCount: 1,
+    itemCount: 3,
     parentId: null,
     description: "Solar cocktail rings, polki bands, and adjustable statement pieces.",
     imageUrl: "/images/product-3-a.jpg",
@@ -126,7 +126,7 @@ export const DEFAULT_CATEGORIES: AdminCategory[] = [
     id: "cat-4",
     name: "Bangles & Bracelets",
     slug: "bangles-bracelets",
-    itemCount: 0,
+    itemCount: 1,
     parentId: null,
     description: "Heritage peacock kadas, meenakari bangles, and delicate hathphool.",
     imageUrl: "/images/product-5-a.jpg",
@@ -137,7 +137,7 @@ export const DEFAULT_CATEGORIES: AdminCategory[] = [
     id: "sub-1",
     name: "Chandbalis",
     slug: "chandbalis",
-    itemCount: 1,
+    itemCount: 2,
     parentId: "cat-1",
     description: "Crescent-shaped royal earrings adorned with meenakari and seed pearls.",
     imageUrl: "/images/product-1-a.jpg",
@@ -146,7 +146,7 @@ export const DEFAULT_CATEGORIES: AdminCategory[] = [
     id: "sub-2",
     name: "Jhumkas",
     slug: "jhumkas",
-    itemCount: 1,
+    itemCount: 6,
     parentId: "cat-1",
     description: "Bell-shaped traditional drops finished with delicate micro-pearl fringe.",
     imageUrl: "/images/product-4-a.jpg",
@@ -155,7 +155,7 @@ export const DEFAULT_CATEGORIES: AdminCategory[] = [
     id: "sub-3",
     name: "Studs & Tops",
     slug: "studs-tops",
-    itemCount: 1,
+    itemCount: 2,
     parentId: "cat-1",
     description: "Minimal polki and kundan solitaires crafted for all-day comfort.",
     imageUrl: "/images/product-1-a.jpg",
@@ -164,7 +164,7 @@ export const DEFAULT_CATEGORIES: AdminCategory[] = [
     id: "sub-4",
     name: "Danglers & Drops",
     slug: "danglers-drops",
-    itemCount: 1,
+    itemCount: 2,
     parentId: "cat-1",
     description: "Cascading shoulder dusters with faceted emerald and ruby hydro beads.",
     imageUrl: "/images/product-4-a.jpg",
@@ -173,7 +173,7 @@ export const DEFAULT_CATEGORIES: AdminCategory[] = [
     id: "sub-5",
     name: "Hoops & Balis",
     slug: "hoops-balis",
-    itemCount: 1,
+    itemCount: 2,
     parentId: "cat-1",
     description: "Intricately filigreed huggies and traditional round balis.",
     imageUrl: "/images/product-1-a.jpg",
@@ -193,7 +193,7 @@ export const DEFAULT_CATEGORIES: AdminCategory[] = [
     id: "sub-7",
     name: "Chokers",
     slug: "chokers",
-    itemCount: 1,
+    itemCount: 2,
     parentId: "cat-2",
     description: "Heritage neck-hugging polki chokers with adjustable silk zari cords.",
     imageUrl: "/images/product-2-a.jpg",
@@ -202,7 +202,7 @@ export const DEFAULT_CATEGORIES: AdminCategory[] = [
     id: "sub-8",
     name: "Haslis & Collars",
     slug: "haslis-collars",
-    itemCount: 1,
+    itemCount: 2,
     parentId: "cat-2",
     description: "Rigid sculpted collars engraved with peacock and floral repoussé motifs.",
     imageUrl: "/images/product-5-a.jpg",
@@ -231,7 +231,7 @@ export const DEFAULT_CATEGORIES: AdminCategory[] = [
     id: "sub-11",
     name: "Cocktail Rings",
     slug: "cocktail-rings",
-    itemCount: 1,
+    itemCount: 2,
     parentId: "cat-3",
     description: "Bold oversized solar and lotus statement pieces with doublet gemstones.",
     imageUrl: "/images/product-3-a.jpg",
@@ -260,7 +260,7 @@ export const DEFAULT_CATEGORIES: AdminCategory[] = [
     id: "sub-14",
     name: "Kadas & Cuffs",
     slug: "kadas",
-    itemCount: 0,
+    itemCount: 1,
     parentId: "cat-4",
     description: "Heavy antique openable cuffs with lion and peacock terminal heads.",
     imageUrl: "/images/product-5-a.jpg",
@@ -313,6 +313,7 @@ interface AdminState {
   updateProduct: (id: string, updates: Partial<PlaceholderProduct>) => void;
   deleteProduct: (id: string) => void;
   deleteAllPlaceholders: () => void;
+  restoreDefaultVariety: () => void;
 
   updateEnquiryStatus: (id: string, status: AdminEnquiry["status"]) => void;
   addEnquiry: (enquiry: Omit<AdminEnquiry, "id">) => void;
@@ -476,6 +477,16 @@ export const useAdminStore = create<AdminState>()(
         });
       },
 
+      restoreDefaultVariety: () => {
+        const current = get().products;
+        const customProducts = current.filter((p) => !p.isPlaceholder);
+        const customSlugs = new Set(customProducts.map((p) => p.slug));
+        const nonConflictingPlaceholders = PLACEHOLDER_PRODUCTS.filter(
+          (p) => !customSlugs.has(p.slug)
+        );
+        set({ products: [...customProducts, ...nonConflictingPlaceholders] });
+      },
+
       updateEnquiryStatus: (id, status) => {
         set({
           enquiries: get().enquiries.map((e) => (e.id === id ? { ...e, status } : e)),
@@ -553,9 +564,58 @@ export const useAdminStore = create<AdminState>()(
       },
     }),
     {
-      name: "albeli_admin_store_v2",
+      name: "albeli_admin_store_v3",
+      version: 3,
+      migrate: (persistedState: any) => {
+        if (!persistedState) return persistedState;
+        const oldProducts: PlaceholderProduct[] = persistedState.products || [];
+        const customProducts = oldProducts.filter((p) => !p.isPlaceholder);
+        const customSlugs = new Set(customProducts.map((p) => p.slug));
+        const merged = [
+          ...customProducts,
+          ...PLACEHOLDER_PRODUCTS.filter((p) => !customSlugs.has(p.slug)),
+        ];
+        return {
+          ...persistedState,
+          products: merged,
+        };
+      },
       storage: createJSONStorage(() => {
-        if (typeof window !== "undefined") return localStorage;
+        if (typeof window !== "undefined") {
+          try {
+            const v3Raw = localStorage.getItem("albeli_admin_store_v3");
+            const v2Raw = localStorage.getItem("albeli_admin_store_v2");
+            if (!v3Raw && v2Raw) {
+              const v2Data = JSON.parse(v2Raw);
+              if (v2Data?.state) {
+                const oldProducts = v2Data.state.products || [];
+                const customProducts = oldProducts.filter((p: any) => !p.isPlaceholder);
+                const customSlugs = new Set(customProducts.map((p: any) => p.slug));
+                v2Data.state.products = [
+                  ...customProducts,
+                  ...PLACEHOLDER_PRODUCTS.filter((p) => !customSlugs.has(p.slug)),
+                ];
+                localStorage.setItem("albeli_admin_store_v3", JSON.stringify(v2Data));
+              }
+            } else if (v3Raw) {
+              const v3Data = JSON.parse(v3Raw);
+              const prods: PlaceholderProduct[] = v3Data?.state?.products || [];
+              const jhumkas = prods.filter(
+                (p) => p.subcategorySlug === "jhumkas" || p.subcategory?.toLowerCase() === "jhumkas"
+              );
+              if (jhumkas.length <= 1) {
+                const customProducts = prods.filter((p) => !p.isPlaceholder);
+                const customSlugs = new Set(customProducts.map((p) => p.slug));
+                v3Data.state.products = [
+                  ...customProducts,
+                  ...PLACEHOLDER_PRODUCTS.filter((p) => !customSlugs.has(p.slug)),
+                ];
+                localStorage.setItem("albeli_admin_store_v3", JSON.stringify(v3Data));
+              }
+            }
+          } catch {}
+          return localStorage;
+        }
         return {
           getItem: () => null,
           setItem: () => {},

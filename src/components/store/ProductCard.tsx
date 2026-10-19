@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Heart, MessageCircle } from "lucide-react";
 import { InstagramIcon } from "@/components/ui/icons";
@@ -19,8 +19,14 @@ interface ProductCardProps {
 export function ProductCard({ product, className, priority = false }: ProductCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [popHeart, setPopHeart] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
-  const isSaved = useSavedDesignsStore((state) => state.isSaved(product.id));
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const savedInStore = useSavedDesignsStore((state) => state.isSaved(product.id));
+  const isSaved = mounted && savedInStore;
   const toggleSave = useSavedDesignsStore((state) => state.toggleSave);
   const settings = useAdminStore((state) => state.settings);
   const openInstagramOrder = useInstagramOrderStore((s) => s.openForProduct);
@@ -124,6 +130,7 @@ export function ProductCard({ product, className, priority = false }: ProductCar
         <button
           onClick={handleSaveClick}
           aria-label={isSaved ? "Remove from saved designs" : "Save this design"}
+          suppressHydrationWarning
           className={cn(
             "absolute top-2 right-2 z-10 w-9 h-9 sm:w-8 sm:h-8 rounded-full bg-white/90 backdrop-blur-xs flex items-center justify-center transition-all duration-200 border border-[#4A0612]/10 shadow-xs hover:bg-white active:scale-125 touch-target",
             popHeart && "scale-125"

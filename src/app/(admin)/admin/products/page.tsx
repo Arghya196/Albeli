@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   Plus,
   Trash2,
@@ -12,13 +13,27 @@ import {
   Package,
   Image as ImageIcon,
   Check,
+  RotateCcw,
+  Sparkles,
+  CheckCircle2,
 } from "lucide-react";
 import { useAdminStore } from "@/lib/store/adminStore";
 import { formatPrice, slugify } from "@/lib/utils";
 import type { PlaceholderProduct } from "@/lib/placeholder-data";
 
-export default function AdminProductsPage() {
-  const { products, categories, addProduct, updateProduct, deleteProduct, deleteAllPlaceholders } = useAdminStore();
+function AdminProductsContent() {
+  const searchParams = useSearchParams();
+  const {
+    products,
+    categories,
+    addProduct,
+    updateProduct,
+    deleteProduct,
+    deleteAllPlaceholders,
+    restoreDefaultVariety,
+  } = useAdminStore();
+
+  const [toastMsg, setToastMsg] = useState("");
 
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
@@ -62,34 +77,73 @@ export default function AdminProductsPage() {
     outfitPairings: ["Saree", "Kurta Set"],
   });
 
-  const handleOpenAdd = () => {
+  const handleOpenAdd = (defaultCat?: string, defaultSub?: string) => {
     setEditingProduct(null);
-    const defaultSubs = subcategoriesForCategory("Earrings");
+    setFormStep(1);
+
+    const chosenCatName =
+      defaultCat ||
+      (selectedCategory !== "all"
+        ? rootCategories.find((c) => c.slug === selectedCategory)?.name || "Earrings"
+        : "Earrings");
+
+    const subs = subcategoriesForCategory(chosenCatName);
+    const chosenSubObj = defaultSub
+      ? subs.find(
+          (s) =>
+            s.slug === defaultSub ||
+            s.name.toLowerCase() === defaultSub.toLowerCase()
+        )
+      : selectedSubcategory !== "all"
+      ? subs.find((s) => s.slug === selectedSubcategory)
+      : subs[0];
+
+    const chosenSubName = chosenSubObj?.name || subs[0]?.name || "";
+    const chosenSubSlug = chosenSubObj?.slug || subs[0]?.slug || "";
+
     setFormData({
-      name: "",
+      name: chosenSubName ? `New ${chosenSubName} Design` : "",
       slug: "",
-      category: "Earrings",
-      categorySlug: "earrings",
-      subcategory: defaultSubs[0]?.name || "Chandbalis",
-      subcategorySlug: defaultSubs[0]?.slug || "chandbalis",
+      category: chosenCatName,
+      categorySlug: slugify(chosenCatName),
+      subcategory: chosenSubName,
+      subcategorySlug: chosenSubSlug,
       price: 1999,
       compareAtPrice: 2499,
-      stock: 5,
+      stock: 6,
       sku: `ALB-${Date.now().toString().slice(-4)}`,
-      description: "Handcrafted in Delhi with royal motifs.",
+      description: `Handcrafted artisanal ${chosenSubName || "jewellery"} piece designed in Delhi with intricate royal motifs.`,
       materialsCare: "Brass base with 22k antique gold plating. Store in airtight pouch.",
       shippingInfo: "Dispatches within 24-48 hours from Delhi.",
-      primaryImage: "/images/product-1-a.jpg",
+      primaryImage: "/images/product-4-a.jpg",
       secondaryImage: "/images/product-1-b.jpg",
       videoUrl: "",
       badges: ["new_arrival"],
-      outfitPairings: ["Festive Kurta", "Saree"],
+      outfitPairings: ["Festive Kurta", "Saree", "Sharara"],
     });
     setModalOpen(true);
   };
 
+  // Listen to incoming search params (e.g. from Categories "Add Jhumka Variety")
+  useEffect(() => {
+    const cat = searchParams.get("category");
+    const sub = searchParams.get("subcategory");
+    const isNew = searchParams.get("new") === "true";
+
+    if (cat && cat !== "all") {
+      setSelectedCategory(cat);
+    }
+    if (sub && sub !== "all") {
+      setSelectedSubcategory(sub);
+    }
+    if (isNew) {
+      handleOpenAdd(cat || undefined, sub || undefined);
+    }
+  }, [searchParams]);
+
   const handleOpenEdit = (p: PlaceholderProduct) => {
     setEditingProduct(p);
+    setFormStep(1);
     setFormData({
       name: p.name,
       slug: p.slug,
@@ -114,9 +168,10 @@ export default function AdminProductsPage() {
   };
 
   const handleDuplicate = (p: PlaceholderProduct) => {
+    const newTitle = `${p.name} (Variety)`;
     addProduct({
-      name: `${p.name} (Copy)`,
-      slug: `${p.slug}-copy-${Date.now().toString().slice(-3)}`,
+      name: newTitle,
+      slug: `${p.slug}-var-${Date.now().toString().slice(-4)}`,
       category: p.category,
       categorySlug: p.categorySlug,
       subcategory: p.subcategory,
@@ -124,7 +179,7 @@ export default function AdminProductsPage() {
       price: p.price,
       compareAtPrice: p.compareAtPrice,
       stock: p.stock,
-      sku: `${p.sku}-CP`,
+      sku: `${p.sku}-V${Date.now().toString().slice(-2)}`,
       description: p.description,
       materialsCare: p.materialsCare,
       shippingInfo: p.shippingInfo,
@@ -135,6 +190,8 @@ export default function AdminProductsPage() {
       outfitPairings: p.outfitPairings,
       isPlaceholder: false,
     });
+    setToastMsg(`Created new variety: "${newTitle}" under ${p.subcategory || p.category}`);
+    setTimeout(() => setToastMsg(""), 3000);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -207,6 +264,14 @@ export default function AdminProductsPage() {
 
   return (
     <div className="space-y-6">
+      {/* Toast Notification */}
+      {toastMsg && (
+        <div className="fixed top-6 right-6 z-50 bg-[#4A0612] text-[#FCEDEA] px-4 py-2.5 rounded-sm shadow-xl flex items-center gap-2 text-xs font-sans animate-in slide-in-from-top duration-200">
+          <CheckCircle2 className="w-4 h-4 text-[#25D366]" />
+          <span>{toastMsg}</span>
+        </div>
+      )}
+
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row items-baseline justify-between gap-4 pb-6 border-b border-[#4A0612]/10">
         <div>
@@ -214,17 +279,32 @@ export default function AdminProductsPage() {
             Jewellery Designs ({products.length})
           </h1>
           <p className="font-sans text-xs text-[#1E1A1A]/60 mt-1">
-            Add, update prices, manage stock, and organize collections.
+            Organize multiple varieties of designs under subcategories (e.g. Jhumkas, Chandbalis, Chokers).
           </p>
         </div>
 
-        <button
-          onClick={handleOpenAdd}
-          className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#4A0612] hover:bg-[#6B1F2E] text-[#FCEDEA] text-xs font-semibold uppercase tracking-wider rounded-sm transition-colors shadow-xs"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Add New Design</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => {
+              restoreDefaultVariety();
+              setToastMsg("Catalogue refreshed! 20 designs loaded with full multi-item Jhumka varieties.");
+              setTimeout(() => setToastMsg(""), 3500);
+            }}
+            className="inline-flex items-center gap-1.5 px-3.5 py-2.5 bg-[#FBF6EE] hover:bg-[#6B1F2E] hover:text-[#FCEDEA] text-[#6B1F2E] border border-[#6B1F2E]/30 text-xs font-semibold uppercase tracking-wider rounded-sm transition-colors shadow-2xs"
+            title="Restore default multi-item variety for all subcategories"
+          >
+            <RotateCcw className="w-3.5 h-3.5" />
+            <span>Sync Catalogue Variety</span>
+          </button>
+
+          <button
+            onClick={() => handleOpenAdd()}
+            className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#4A0612] hover:bg-[#6B1F2E] text-[#FCEDEA] text-xs font-semibold uppercase tracking-wider rounded-sm transition-colors shadow-xs"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Add New Design</span>
+          </button>
+        </div>
       </div>
 
       {/* Search & Filter Toolbar */}
@@ -234,7 +314,7 @@ export default function AdminProductsPage() {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by title or SKU..."
+            placeholder="Search by title, SKU, or subcategory..."
             className="w-full pl-9 pr-3.5 py-2 bg-[#FBF6EE]/40 border border-[#4A0612]/15 rounded-sm text-xs font-sans focus:outline-none focus:border-[#6B1F2E]"
           />
           <Search className="w-4 h-4 text-[#1E1A1A]/40 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
@@ -249,12 +329,17 @@ export default function AdminProductsPage() {
             }}
             className="px-3 py-2 bg-[#FBF6EE]/40 border border-[#4A0612]/15 rounded-sm text-xs font-sans text-[#1E1A1A] focus:outline-none focus:border-[#6B1F2E]"
           >
-            <option value="all">All Categories</option>
-            {rootCategories.map((c) => (
-              <option key={c.id} value={c.slug}>
-                {c.name}
-              </option>
-            ))}
+            <option value="all">All Categories ({products.length})</option>
+            {rootCategories.map((c) => {
+              const catCount = products.filter(
+                (p) => p.categorySlug === c.slug || slugify(p.category || "") === c.slug
+              ).length;
+              return (
+                <option key={c.id} value={c.slug}>
+                  {c.name} ({catCount})
+                </option>
+              );
+            })}
           </select>
 
           {selectedCategory !== "all" && subcategoriesForCategory(selectedCategory).length > 0 && (
@@ -264,15 +349,89 @@ export default function AdminProductsPage() {
               className="px-3 py-2 bg-[#FBF6EE]/40 border border-[#4A0612]/20 rounded-sm text-xs font-sans text-[#6B1F2E] font-medium focus:outline-none focus:border-[#6B1F2E] animate-in fade-in duration-150"
             >
               <option value="all">All Subcategories</option>
-              {subcategoriesForCategory(selectedCategory).map((s) => (
-                <option key={s.id} value={s.slug}>
-                  {s.name}
-                </option>
-              ))}
+              {subcategoriesForCategory(selectedCategory).map((s) => {
+                const subCount = products.filter(
+                  (p) =>
+                    (p.categorySlug === selectedCategory ||
+                      slugify(p.category || "") === selectedCategory) &&
+                    (p.subcategorySlug === s.slug || slugify(p.subcategory || "") === s.slug)
+                ).length;
+                return (
+                  <option key={s.id} value={s.slug}>
+                    {s.name} ({subCount} {subCount === 1 ? "variety" : "varieties"})
+                  </option>
+                );
+              })}
             </select>
           )}
         </div>
       </div>
+
+      {/* Active Subcategory Context Banner */}
+      {selectedCategory !== "all" && (
+        <div className="bg-gradient-to-r from-[#FBF6EE] via-white to-[#FBF6EE] p-3.5 sm:p-4 rounded-sm border border-[#4A0612]/15 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs font-sans shadow-2xs">
+          <div className="flex items-center gap-2.5">
+            <Sparkles className="w-4 h-4 text-[#6B1F2E] shrink-0" />
+            <div>
+              <span>
+                Filtered by:{" "}
+                <strong className="text-[#1E1A1A]">
+                  {rootCategories.find((c) => c.slug === selectedCategory)?.name || selectedCategory}
+                </strong>
+                {selectedSubcategory !== "all" && (
+                  <>
+                    {" "}
+                    ›{" "}
+                    <span className="text-[#6B1F2E] font-bold">
+                      {subcategoriesForCategory(selectedCategory).find(
+                        (s) => s.slug === selectedSubcategory
+                      )?.name || selectedSubcategory}
+                    </span>
+                  </>
+                )}{" "}
+                ({filteredProducts.length} {filteredProducts.length === 1 ? "design" : "designs"})
+              </span>
+              <span className="block text-[11px] text-[#1E1A1A]/55 mt-0.5">
+                Every design here belongs to this subcategory. You can add more varieties or duplicate designs below.
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={() =>
+                handleOpenAdd(
+                  selectedCategory,
+                  selectedSubcategory !== "all" ? selectedSubcategory : undefined
+                )
+              }
+              className="px-3 py-1.5 bg-[#4A0612] hover:bg-[#6B1F2E] text-[#FCEDEA] text-[11px] font-semibold uppercase tracking-wider rounded-xs flex items-center gap-1 shadow-2xs transition-colors"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>
+                Add{" "}
+                {selectedSubcategory !== "all"
+                  ? `${
+                      subcategoriesForCategory(selectedCategory).find(
+                        (s) => s.slug === selectedSubcategory
+                      )?.name || selectedSubcategory
+                    } Variety`
+                  : "Design"}
+              </span>
+            </button>
+
+            <button
+              onClick={() => {
+                setSelectedCategory("all");
+                setSelectedSubcategory("all");
+              }}
+              className="px-2.5 py-1.5 bg-white hover:bg-[#FBF6EE] text-[#1E1A1A]/70 border border-[#4A0612]/15 rounded-xs text-[11px] font-medium"
+            >
+              View All
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Mobile Cards List (sm:hidden) */}
       <div className="block sm:hidden space-y-3">
@@ -840,5 +999,19 @@ export default function AdminProductsPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function AdminProductsPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="py-20 text-center font-sans text-xs text-[#1E1A1A]/60">
+          Loading designs catalogue...
+        </div>
+      }
+    >
+      <AdminProductsContent />
+    </Suspense>
   );
 }

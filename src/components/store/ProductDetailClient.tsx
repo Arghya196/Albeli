@@ -70,7 +70,12 @@ export function ProductDetailClient({ slug }: { slug: string }) {
   const [openAccordion, setOpenAccordion] = useState<string | null>(null);
 
   // Saved Designs Zustand store
-  const isSaved = useSavedDesignsStore((state) => state.isSaved(product.id));
+  const savedInStore = useSavedDesignsStore((state) => state.isSaved(product.id));
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+  const isSaved = mounted && savedInStore;
   const toggleSave = useSavedDesignsStore((state) => state.toggleSave);
 
   const whatsappNumber = storeSettings?.whatsappNumber || siteConfig.whatsappNumber;
