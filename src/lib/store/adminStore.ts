@@ -299,9 +299,17 @@ export const useAdminStore = create<AdminState>()(
       },
 
       updateNavigation: (nav) => {
+        const updated = { ...get().navigation, ...nav };
         set({
-          navigation: { ...get().navigation, ...nav },
+          navigation: updated,
         });
+        if (typeof window !== "undefined") {
+          fetch("/api/navigation", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(updated),
+          }).catch((err) => console.error("Error syncing navigation to DB:", err));
+        }
       },
 
       addReview: (review) => {
@@ -323,24 +331,39 @@ export const useAdminStore = create<AdminState>()(
         set({
           reviews: get().reviews.filter((r) => r.id !== id),
         });
+        if (typeof window !== "undefined") {
+          fetch(`/api/reviews?id=${id}`, {
+            method: "DELETE",
+          }).catch((err) => console.error("Error syncing review delete to DB:", err));
+        }
       },
 
       toggleReviewVisibility: (id) => {
-        set({
-          reviews: get().reviews.map((r) =>
-            r.id === id ? { ...r, visible: !r.visible } : r
-          ),
-        });
+        const updatedReviews = get().reviews.map((r) =>
+          r.id === id ? { ...r, visible: !r.visible } : r
+        );
+        set({ reviews: updatedReviews });
+        if (typeof window !== "undefined") {
+          const changed = updatedReviews.find((r) => r.id === id);
+          if (changed) {
+            fetch("/api/reviews", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(changed),
+            }).catch((err) => console.error("Error syncing review update to DB:", err));
+          }
+        }
       },
 
       syncFromDatabase: async () => {
         if (typeof window === "undefined") return;
         try {
-          const [pRes, cRes, sRes, rRes] = await Promise.all([
+          const [pRes, cRes, sRes, rRes, nRes] = await Promise.all([
             fetch("/api/products"),
             fetch("/api/categories"),
             fetch("/api/settings"),
             fetch("/api/reviews"),
+            fetch("/api/navigation"),
           ]);
 
           if (pRes.ok) {
@@ -365,6 +388,12 @@ export const useAdminStore = create<AdminState>()(
             const rData = await rRes.json();
             if (Array.isArray(rData.reviews) && rData.reviews.length > 0) {
               set({ reviews: rData.reviews });
+            }
+          }
+          if (nRes.ok) {
+            const nData = await nRes.json();
+            if (nData.navigation && (nData.navigation.header || nData.navigation.footer)) {
+              set({ navigation: { ...get().navigation, ...nData.navigation } });
             }
           }
         } catch (err) {
