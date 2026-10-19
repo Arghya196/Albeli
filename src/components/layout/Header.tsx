@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -16,7 +16,7 @@ import {
 import { InstagramIcon } from "@/components/ui/icons";
 import { Logo } from "@/components/brand/Logo";
 import { useSavedDesignsStore } from "@/lib/store/savedDesigns";
-import { useAdminStore, type NavItem } from "@/lib/store/adminStore";
+import { useAdminStore, DEFAULT_CATEGORIES, type NavItem, type AdminCategory } from "@/lib/store/adminStore";
 import { siteConfig, cn } from "@/lib/utils";
 
 const POPULAR_SEARCHES = ["Chandbali", "Polki", "Choker", "Jhumka", "Hasli", "Ring"];
@@ -39,11 +39,40 @@ export function Header() {
   const [searchOverlayOpen, setSearchOverlayOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [shopAccordionOpen, setShopAccordionOpen] = useState(false);
+  const [shopDropdownOpen, setShopDropdownOpen] = useState(false);
+  const dropdownTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [language, setLanguage] = useState<"en" | "hi">("en");
 
   // Scroll direction for hide/show on mobile
   const [showHeader, setShowHeader] = useState(true);
   const lastScrollY = useRef(0);
+
+  // Dynamic Categories for Header Mega Dropdown
+  const storeCategories = useAdminStore((state) => state.categories);
+  const categoriesList = storeCategories && storeCategories.length > 0 ? storeCategories : DEFAULT_CATEGORIES;
+  const rootCategories = useMemo(() => categoriesList.filter((c) => !c.parentId), [categoriesList]);
+  const subcategoriesMap = useMemo(() => {
+    const map = new Map<string, typeof categoriesList>();
+    categoriesList.forEach((c) => {
+      if (c.parentId) {
+        const list = map.get(c.parentId) || [];
+        list.push(c);
+        map.set(c.parentId, list);
+      }
+    });
+    return map;
+  }, [categoriesList]);
+
+  const handleMouseEnterShop = () => {
+    if (dropdownTimeoutRef.current) clearTimeout(dropdownTimeoutRef.current);
+    setShopDropdownOpen(true);
+  };
+
+  const handleMouseLeaveShop = () => {
+    dropdownTimeoutRef.current = setTimeout(() => {
+      setShopDropdownOpen(false);
+    }, 200);
+  };
 
   // ── Secret Admin Access: 6 taps on User icon (or Logo) within 3 seconds ──
   const secretTapCount = useRef(0);
@@ -187,26 +216,116 @@ export function Header() {
 
             {/* Desktop Left Nav */}
             <nav className="hidden lg:flex items-center space-x-8 flex-1 justify-start">
-              {leftNav.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className={cn(
-                    "relative font-sans text-xs tracking-[0.18em] uppercase transition-colors py-1 group",
-                    pathname === item.href
-                      ? "text-[#6B1F2E] font-medium"
-                      : "text-[#1E1A1A]/80 hover:text-[#6B1F2E]"
-                  )}
-                >
-                  <span>{item.label}</span>
-                  <span
+              {leftNav.map((item) => {
+                if (item.href === "/shop") {
+                  return (
+                    <div
+                      key={item.href}
+                      className="relative py-1 group"
+                      onMouseEnter={handleMouseEnterShop}
+                      onMouseLeave={handleMouseLeaveShop}
+                    >
+                      <Link
+                        href={item.href}
+                        className={cn(
+                          "relative font-sans text-xs tracking-[0.18em] uppercase transition-colors flex items-center gap-1",
+                          pathname === item.href || pathname.startsWith("/shop")
+                            ? "text-[#6B1F2E] font-medium"
+                            : "text-[#1E1A1A]/80 hover:text-[#6B1F2E]"
+                        )}
+                      >
+                        <span>{item.label}</span>
+                        <ChevronDown className="w-3 h-3 transition-transform duration-200 group-hover:rotate-180 opacity-60" />
+                        <span
+                          className={cn(
+                            "absolute bottom-0 left-0 w-0 h-[1.5px] bg-[#6B1F2E] transition-all duration-300 group-hover:w-full",
+                            (pathname === item.href || pathname.startsWith("/shop")) && "w-full"
+                          )}
+                        />
+                      </Link>
+
+                      {/* Dropdown Menu */}
+                      {shopDropdownOpen && (
+                        <div
+                          className="absolute top-full left-0 mt-3 w-[620px] bg-[#FBF6EE] rounded-sm shadow-2xl border border-[#4A0612]/15 p-6 z-50 animate-in fade-in slide-in-from-top-2 duration-200"
+                          onMouseEnter={handleMouseEnterShop}
+                          onMouseLeave={handleMouseLeaveShop}
+                        >
+                          <div className="grid grid-cols-3 gap-6 font-sans">
+                            {rootCategories.slice(0, 3).map((parentCat: AdminCategory) => {
+                              const subs = subcategoriesMap.get(parentCat.id) || [];
+                              return (
+                                <div key={parentCat.id} className="space-y-2.5">
+                                  <Link
+                                    href={`/shop?category=${parentCat.slug}`}
+                                    onClick={() => setShopDropdownOpen(false)}
+                                    className="font-display text-base text-[#1E1A1A] hover:text-[#6B1F2E] transition-colors block pb-1 border-b border-[#4A0612]/10 font-medium"
+                                  >
+                                    {parentCat.name}
+                                  </Link>
+                                  <div className="space-y-1.5 text-xs text-[#1E1A1A]/75">
+                                    <Link
+                                      href={`/shop?category=${parentCat.slug}`}
+                                      onClick={() => setShopDropdownOpen(false)}
+                                      className="block hover:text-[#6B1F2E] font-medium text-[11px] text-[#6B1F2E]"
+                                    >
+                                      All {parentCat.name} →
+                                    </Link>
+                                    {subs.map((sub: AdminCategory) => (
+                                      <Link
+                                        key={sub.id}
+                                        href={`/shop?category=${parentCat.slug}&subcategory=${sub.slug}`}
+                                        onClick={() => setShopDropdownOpen(false)}
+                                        className="block hover:text-[#6B1F2E] text-[11px] transition-colors py-0.5"
+                                      >
+                                        {sub.name}
+                                      </Link>
+                                    ))}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+
+                          <div className="mt-5 pt-3 border-t border-[#4A0612]/10 flex items-center justify-between text-xs font-sans">
+                            <span className="text-[#1E1A1A]/50">
+                              Handcrafted in Delhi • Authentic Polki & Meenakari
+                            </span>
+                            <Link
+                              href="/shop"
+                              onClick={() => setShopDropdownOpen(false)}
+                              className="text-[#6B1F2E] font-semibold hover:underline"
+                            >
+                              Explore Full Catalogue →
+                            </Link>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                }
+
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
                     className={cn(
-                      "absolute bottom-0 left-0 w-0 h-[1.5px] bg-[#6B1F2E] transition-all duration-300 group-hover:w-full",
-                      pathname === item.href && "w-full"
+                      "relative font-sans text-xs tracking-[0.18em] uppercase transition-colors py-1 group",
+                      pathname === item.href
+                        ? "text-[#6B1F2E] font-medium"
+                        : "text-[#1E1A1A]/80 hover:text-[#6B1F2E]"
                     )}
-                  />
-                </Link>
-              ))}
+                  >
+                    <span>{item.label}</span>
+                    <span
+                      className={cn(
+                        "absolute bottom-0 left-0 w-0 h-[1.5px] bg-[#6B1F2E] transition-all duration-300 group-hover:w-full",
+                        pathname === item.href && "w-full"
+                      )}
+                    />
+                  </Link>
+                );
+              })}
             </nav>
 
             {/* Centred Brand Logo — 6 rapid taps opens admin, single click goes home */}
@@ -343,25 +462,40 @@ export function Header() {
                   </div>
 
                   {shopAccordionOpen && (
-                    <div className="pl-4 pb-2 space-y-2 text-sm text-[#1E1A1A]/70">
-                      <Link
-                        href="/shop?category=earrings"
-                        className="block py-1.5 hover:text-[#6B1F2E]"
-                      >
-                        • Earrings & Chandbalis
-                      </Link>
-                      <Link
-                        href="/shop?category=necklaces"
-                        className="block py-1.5 hover:text-[#6B1F2E]"
-                      >
-                        • Necklaces & Haslis
-                      </Link>
-                      <Link
-                        href="/shop?category=rings"
-                        className="block py-1.5 hover:text-[#6B1F2E]"
-                      >
-                        • Statement Rings
-                      </Link>
+                    <div className="pl-3 pb-3 pt-1 space-y-3 font-sans">
+                      {rootCategories.map((cat: AdminCategory) => {
+                        const subs = subcategoriesMap.get(cat.id) || [];
+                        return (
+                          <div key={cat.id} className="space-y-1">
+                            <Link
+                              href={`/shop?category=${cat.slug}`}
+                              onClick={() => setMobileMenuOpen(false)}
+                              className="font-medium text-[#6B1F2E] block text-xs uppercase tracking-wider"
+                            >
+                              {cat.name}
+                            </Link>
+                            <div className="pl-2 space-y-1 border-l border-[#6B1F2E]/20 text-xs text-[#1E1A1A]/70">
+                              <Link
+                                href={`/shop?category=${cat.slug}`}
+                                onClick={() => setMobileMenuOpen(false)}
+                                className="block py-0.5 hover:text-[#6B1F2E]"
+                              >
+                                All {cat.name}
+                              </Link>
+                              {subs.map((s: AdminCategory) => (
+                                <Link
+                                  key={s.id}
+                                  href={`/shop?category=${cat.slug}&subcategory=${s.slug}`}
+                                  onClick={() => setMobileMenuOpen(false)}
+                                  className="block py-0.5 hover:text-[#6B1F2E]"
+                                >
+                                  {s.name}
+                                </Link>
+                              ))}
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   )}
                 </div>

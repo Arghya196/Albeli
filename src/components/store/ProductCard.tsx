@@ -173,7 +173,9 @@ export function ProductCard({ product, className, priority = false }: ProductCar
       <div className="p-3 sm:p-4 flex flex-col flex-1 justify-between bg-white">
         <div>
           <div className="flex items-center justify-between text-[11px] text-[#1E1A1A]/50 uppercase tracking-widest mb-1 font-sans">
-            <span>{product.category}</span>
+            <span className="truncate pr-1">
+              {product.subcategory ? `${product.category} • ${product.subcategory}` : product.category}
+            </span>
             {product.stock <= 4 && product.stock > 0 && (
               <span className="text-[#6B1F2E] font-medium text-[10px]">
                 Only {product.stock} left

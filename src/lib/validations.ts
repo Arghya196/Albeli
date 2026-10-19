@@ -62,6 +62,8 @@ export const productSchema = z.object({
   stock: z.number().int().min(0).default(0),
   sku: z.string().max(50).optional().nullable(),
   categoryId: z.string().uuid().optional().nullable(),
+  subcategoryId: z.string().uuid().optional().nullable(),
+  subcategory: z.string().optional().nullable(),
   attributes: z.record(z.string(), z.union([z.string(), z.array(z.string())])).default({}),
   badges: z.array(z.enum(["best_seller", "new_arrival", "sale"])).default([]),
   tags: z.array(z.string()).default([]),

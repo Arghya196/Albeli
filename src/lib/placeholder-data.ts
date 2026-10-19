@@ -14,6 +14,8 @@ export interface PlaceholderProduct {
   sku: string;
   category: string;
   categorySlug: string;
+  subcategory?: string;
+  subcategorySlug?: string;
   badges: ("best_seller" | "new_arrival" | "sale")[];
   outfitPairings: string[];
   materialsCare: string;
@@ -101,6 +103,8 @@ export const PLACEHOLDER_PRODUCTS: PlaceholderProduct[] = [
     sku: "ALB-ER-001",
     category: "Earrings",
     categorySlug: "earrings",
+    subcategory: "Chandbalis",
+    subcategorySlug: "chandbalis",
     badges: ["best_seller"],
     outfitPairings: ["Chanderi Saree", "Banarasi Anarkali", "Festive Kurta"],
     materialsCare:
@@ -124,6 +128,8 @@ export const PLACEHOLDER_PRODUCTS: PlaceholderProduct[] = [
     sku: "ALB-NK-002",
     category: "Necklaces",
     categorySlug: "necklaces",
+    subcategory: "Chokers",
+    subcategorySlug: "chokers",
     badges: ["best_seller", "new_arrival"],
     outfitPairings: ["Raw Silk Saree", "Bridal Velvet Blouse", "Ivory Lehenga"],
     materialsCare:
@@ -146,6 +152,8 @@ export const PLACEHOLDER_PRODUCTS: PlaceholderProduct[] = [
     sku: "ALB-RG-003",
     category: "Rings",
     categorySlug: "rings",
+    subcategory: "Cocktail Rings",
+    subcategorySlug: "cocktail-rings",
     badges: ["new_arrival"],
     outfitPairings: ["Cocktail Saree", "Western Fusion Blazer", "Mehendi Suit"],
     materialsCare:
@@ -167,6 +175,8 @@ export const PLACEHOLDER_PRODUCTS: PlaceholderProduct[] = [
     sku: "ALB-ER-004",
     category: "Earrings",
     categorySlug: "earrings",
+    subcategory: "Jhumkas",
+    subcategorySlug: "jhumkas",
     badges: ["best_seller"],
     outfitPairings: ["Cotton Mulmul Kurta", "Pastel Sharara", "Bandhani Saree"],
     materialsCare:
@@ -188,6 +198,8 @@ export const PLACEHOLDER_PRODUCTS: PlaceholderProduct[] = [
     sku: "ALB-NK-005",
     category: "Necklaces",
     categorySlug: "necklaces",
+    subcategory: "Haslis & Collars",
+    subcategorySlug: "haslis-collars",
     badges: ["new_arrival"],
     outfitPairings: ["Deep V-neck Kurta", "Minimal Linen Shirt", "Solid Black Tussar Saree"],
     materialsCare:
@@ -209,10 +221,56 @@ export const PLACEHOLDER_PRODUCTS: PlaceholderProduct[] = [
     sku: "ALB-ER-006",
     category: "Earrings",
     categorySlug: "earrings",
+    subcategory: "Studs & Tops",
+    subcategorySlug: "studs-tops",
     badges: ["sale"],
     outfitPairings: ["Daily Office Wear", "White Linen Shirt", "Casual Denim & Kurti"],
     materialsCare: "Surgical steel posts with gold-plated brass setting. Water-resistant and tarnish-resistant.",
     shippingInfo: "Ships within 24 hours. Free shipping over ₹999.",
+    primaryImage: "/images/product-1-a.jpg",
+    secondaryImage: "/images/product-1-b.jpg",
+    isPlaceholder: true,
+  },
+  {
+    id: "prod-007",
+    name: "Noor Cascading Emerald Dangler Earrings",
+    slug: "noor-cascading-emerald-dangler-earrings",
+    description:
+      "Dramatic shoulder-grazing danglers showcasing faceted emerald hydro-beads framed by vintage polki floral crowns. Unbelievably lightweight with sterling silver ear posts.",
+    price: 219900,
+    compareAtPrice: 289900,
+    stock: 6,
+    sku: "ALB-ER-007",
+    category: "Earrings",
+    categorySlug: "earrings",
+    subcategory: "Danglers & Drops",
+    subcategorySlug: "danglers-drops",
+    badges: ["new_arrival"],
+    outfitPairings: ["Cocktail Gown", "Raw Silk Kurta", "Organza Saree"],
+    materialsCare: "Brass with 22k antique gold plating and hydro beads. Avoid alcohol sprays.",
+    shippingInfo: "Dispatches within 24 hours from Delhi.",
+    primaryImage: "/images/product-4-a.jpg",
+    secondaryImage: "/images/product-4-b.jpg",
+    isPlaceholder: true,
+  },
+  {
+    id: "prod-008",
+    name: "Sitara Filigree Polki Bali Hoops",
+    slug: "sitara-filigree-polki-bali-hoops",
+    description:
+      "Classic Indian balis re-imagined with delicate wire filigree, uncut glass polki bezels, and dangling pearl drops. Effortless latch closure for secure all-day wear.",
+    price: 139900,
+    compareAtPrice: 179900,
+    stock: 11,
+    sku: "ALB-ER-008",
+    category: "Earrings",
+    categorySlug: "earrings",
+    subcategory: "Hoops & Balis",
+    subcategorySlug: "hoops-balis",
+    badges: ["best_seller"],
+    outfitPairings: ["Linen Saree", "Boho Kurti", "Everyday Chikankari"],
+    materialsCare: "Hypoallergenic brass with micro-gold polish.",
+    shippingInfo: "Ships within 24 hours.",
     primaryImage: "/images/product-1-a.jpg",
     secondaryImage: "/images/product-1-b.jpg",
     isPlaceholder: true,

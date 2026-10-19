@@ -18,13 +18,27 @@ import { formatPrice, slugify } from "@/lib/utils";
 import type { PlaceholderProduct } from "@/lib/placeholder-data";
 
 export default function AdminProductsPage() {
-  const { products, addProduct, updateProduct, deleteProduct, deleteAllPlaceholders } = useAdminStore();
+  const { products, categories, addProduct, updateProduct, deleteProduct, deleteAllPlaceholders } = useAdminStore();
 
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [selectedSubcategory, setSelectedSubcategory] = useState("all");
   const [modalOpen, setModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<PlaceholderProduct | null>(null);
   const [formStep, setFormStep] = useState<1 | 2 | 3>(1);
+
+  // Categories & Subcategories helpers
+  const rootCategories = categories.filter((c) => !c.parentId);
+  const subcategoriesForCategory = (catNameOrSlug: string) => {
+    const parent = categories.find(
+      (c) =>
+        !c.parentId &&
+        (c.name.toLowerCase() === catNameOrSlug.toLowerCase() ||
+          c.slug.toLowerCase() === catNameOrSlug.toLowerCase())
+    );
+    if (!parent) return [];
+    return categories.filter((c) => c.parentId === parent.id);
+  };
 
   // Form State for Add / Edit
   const [formData, setFormData] = useState({
@@ -32,6 +46,8 @@ export default function AdminProductsPage() {
     slug: "",
     category: "Earrings",
     categorySlug: "earrings",
+    subcategory: "Chandbalis",
+    subcategorySlug: "chandbalis",
     price: 1999,
     compareAtPrice: 2499,
     stock: 5,
@@ -48,11 +64,14 @@ export default function AdminProductsPage() {
 
   const handleOpenAdd = () => {
     setEditingProduct(null);
+    const defaultSubs = subcategoriesForCategory("Earrings");
     setFormData({
       name: "",
       slug: "",
       category: "Earrings",
       categorySlug: "earrings",
+      subcategory: defaultSubs[0]?.name || "Chandbalis",
+      subcategorySlug: defaultSubs[0]?.slug || "chandbalis",
       price: 1999,
       compareAtPrice: 2499,
       stock: 5,
@@ -76,6 +95,8 @@ export default function AdminProductsPage() {
       slug: p.slug,
       category: p.category,
       categorySlug: p.categorySlug,
+      subcategory: p.subcategory || "",
+      subcategorySlug: p.subcategorySlug || "",
       price: p.price / 100,
       compareAtPrice: p.compareAtPrice ? p.compareAtPrice / 100 : 0,
       stock: p.stock,
@@ -98,6 +119,8 @@ export default function AdminProductsPage() {
       slug: `${p.slug}-copy-${Date.now().toString().slice(-3)}`,
       category: p.category,
       categorySlug: p.categorySlug,
+      subcategory: p.subcategory,
+      subcategorySlug: p.subcategorySlug,
       price: p.price,
       compareAtPrice: p.compareAtPrice,
       stock: p.stock,
@@ -127,6 +150,8 @@ export default function AdminProductsPage() {
         slug: autoSlug,
         category: formData.category,
         categorySlug: slugify(formData.category),
+        subcategory: formData.subcategory || undefined,
+        subcategorySlug: formData.subcategory ? slugify(formData.subcategory) : undefined,
         price: priceInPaise,
         compareAtPrice: compareAtInPaise,
         stock: Number(formData.stock),
@@ -146,6 +171,8 @@ export default function AdminProductsPage() {
         slug: autoSlug,
         category: formData.category,
         categorySlug: slugify(formData.category),
+        subcategory: formData.subcategory || undefined,
+        subcategorySlug: formData.subcategory ? slugify(formData.subcategory) : undefined,
         price: priceInPaise,
         compareAtPrice: compareAtInPaise,
         stock: Number(formData.stock),
@@ -165,14 +192,17 @@ export default function AdminProductsPage() {
     setModalOpen(false);
   };
 
-  // Filter products by search and category
+  // Filter products by search, category, and subcategory
   const filteredProducts = products.filter((p) => {
     const matchesSearch =
       p.name.toLowerCase().includes(search.toLowerCase()) ||
-      p.sku.toLowerCase().includes(search.toLowerCase());
+      p.sku.toLowerCase().includes(search.toLowerCase()) ||
+      (p.subcategory && p.subcategory.toLowerCase().includes(search.toLowerCase()));
     const matchesCategory =
       selectedCategory === "all" || p.categorySlug === selectedCategory;
-    return matchesSearch && matchesCategory;
+    const matchesSubcategory =
+      selectedSubcategory === "all" || p.subcategorySlug === selectedSubcategory;
+    return matchesSearch && matchesCategory && matchesSubcategory;
   });
 
   return (
@@ -210,17 +240,37 @@ export default function AdminProductsPage() {
           <Search className="w-4 h-4 text-[#1E1A1A]/40 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
         </div>
 
-        <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
+        <div className="flex flex-wrap items-center gap-2.5 w-full sm:w-auto justify-end">
           <select
             value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
+            onChange={(e) => {
+              setSelectedCategory(e.target.value);
+              setSelectedSubcategory("all");
+            }}
             className="px-3 py-2 bg-[#FBF6EE]/40 border border-[#4A0612]/15 rounded-sm text-xs font-sans text-[#1E1A1A] focus:outline-none focus:border-[#6B1F2E]"
           >
             <option value="all">All Categories</option>
-            <option value="earrings">Earrings</option>
-            <option value="necklaces">Necklaces</option>
-            <option value="rings">Rings</option>
+            {rootCategories.map((c) => (
+              <option key={c.id} value={c.slug}>
+                {c.name}
+              </option>
+            ))}
           </select>
+
+          {selectedCategory !== "all" && subcategoriesForCategory(selectedCategory).length > 0 && (
+            <select
+              value={selectedSubcategory}
+              onChange={(e) => setSelectedSubcategory(e.target.value)}
+              className="px-3 py-2 bg-[#FBF6EE]/40 border border-[#4A0612]/20 rounded-sm text-xs font-sans text-[#6B1F2E] font-medium focus:outline-none focus:border-[#6B1F2E] animate-in fade-in duration-150"
+            >
+              <option value="all">All Subcategories</option>
+              {subcategoriesForCategory(selectedCategory).map((s) => (
+                <option key={s.id} value={s.slug}>
+                  {s.name}
+                </option>
+              ))}
+            </select>
+          )}
         </div>
       </div>
 
@@ -270,9 +320,16 @@ export default function AdminProductsPage() {
               </div>
 
               <div className="pt-2 border-t border-[#4A0612]/5 flex items-center justify-between">
-                <span className="text-[11px] text-[#1E1A1A]/60 font-sans">
-                  {p.category}
-                </span>
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <span className="text-[11px] font-medium text-[#1E1A1A]/80 font-sans">
+                    {p.category}
+                  </span>
+                  {p.subcategory && (
+                    <span className="text-[10px] text-[#6B1F2E] bg-[#4A0612]/5 px-1.5 py-0.5 rounded-xs font-sans font-medium">
+                      › {p.subcategory}
+                    </span>
+                  )}
+                </div>
                 <div className="flex items-center gap-1.5">
                   <button
                     onClick={() => handleOpenEdit(p)}
@@ -352,9 +409,19 @@ export default function AdminProductsPage() {
                     {p.sku}
                   </td>
 
-                  {/* Category */}
-                  <td className="py-3 px-4 text-[#1E1A1A]/80">
-                    {p.category}
+                  {/* Category & Subcategory */}
+                  <td className="py-3 px-4">
+                    <span className="text-[#1E1A1A]/90 font-medium block">
+                      {p.category}
+                    </span>
+                    {p.subcategory ? (
+                      <span className="inline-flex items-center gap-1 text-[10px] text-[#6B1F2E] bg-[#4A0612]/5 px-1.5 py-0.5 rounded-xs mt-0.5 font-sans font-medium">
+                        <span>›</span>
+                        <span>{p.subcategory}</span>
+                      </span>
+                    ) : (
+                      <span className="text-[10px] text-[#1E1A1A]/40 font-sans">General</span>
+                    )}
                   </td>
 
                   {/* Price */}
@@ -616,16 +683,54 @@ export default function AdminProductsPage() {
                       </label>
                       <select
                         value={formData.category}
-                        onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                        onChange={(e) => {
+                          const newCat = e.target.value;
+                          const subs = subcategoriesForCategory(newCat);
+                          setFormData({
+                            ...formData,
+                            category: newCat,
+                            categorySlug: slugify(newCat),
+                            subcategory: subs[0]?.name || "",
+                            subcategorySlug: subs[0]?.slug || "",
+                          });
+                        }}
                         className="w-full px-3.5 py-3 bg-[#FBF6EE]/40 border border-[#4A0612]/20 rounded-sm text-xs font-sans focus:outline-none focus:border-[#6B1F2E]"
                       >
-                        <option value="Earrings">Earrings</option>
-                        <option value="Necklaces">Necklaces</option>
-                        <option value="Rings">Rings</option>
-                        <option value="Chokers">Chokers</option>
+                        {rootCategories.map((c) => (
+                          <option key={c.id} value={c.name}>
+                            {c.name}
+                          </option>
+                        ))}
                       </select>
                     </div>
 
+                    <div>
+                      <label className="block text-xs font-semibold text-[#1E1A1A] mb-1 font-sans flex items-center justify-between">
+                        <span>Subcategory</span>
+                        <span className="text-[10px] text-[#6B1F2E] font-medium">e.g. Chandbalis, Jhumkas</span>
+                      </label>
+                      <select
+                        value={formData.subcategory}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            subcategory: e.target.value,
+                            subcategorySlug: slugify(e.target.value),
+                          })
+                        }
+                        className="w-full px-3.5 py-3 bg-[#FBF6EE]/40 border border-[#4A0612]/20 rounded-sm text-xs font-sans focus:outline-none focus:border-[#6B1F2E]"
+                      >
+                        <option value="">None / General</option>
+                        {subcategoriesForCategory(formData.category).map((s) => (
+                          <option key={s.id} value={s.name}>
+                            {s.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-xs font-semibold text-[#1E1A1A] mb-1 font-sans">
                         Price (₹ INR) *
@@ -639,19 +744,19 @@ export default function AdminProductsPage() {
                         className="w-full px-3.5 py-3 bg-[#FBF6EE]/40 border border-[#4A0612]/20 rounded-sm text-xs font-sans focus:outline-none focus:border-[#6B1F2E]"
                       />
                     </div>
-                  </div>
 
-                  <div>
-                    <label className="block text-xs font-semibold text-[#1E1A1A] mb-1 font-sans">
-                      Compare-at MRP (₹ INR Strikethrough)
-                    </label>
-                    <input
-                      type="number"
-                      min="0"
-                      value={formData.compareAtPrice}
-                      onChange={(e) => setFormData({ ...formData, compareAtPrice: Number(e.target.value) })}
-                      className="w-full px-3.5 py-3 bg-[#FBF6EE]/40 border border-[#4A0612]/20 rounded-sm text-xs font-sans focus:outline-none focus:border-[#6B1F2E]"
-                    />
+                    <div>
+                      <label className="block text-xs font-semibold text-[#1E1A1A] mb-1 font-sans">
+                        Compare-at MRP (₹ INR Strikethrough)
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        value={formData.compareAtPrice}
+                        onChange={(e) => setFormData({ ...formData, compareAtPrice: Number(e.target.value) })}
+                        className="w-full px-3.5 py-3 bg-[#FBF6EE]/40 border border-[#4A0612]/20 rounded-sm text-xs font-sans focus:outline-none focus:border-[#6B1F2E]"
+                      />
+                    </div>
                   </div>
 
                   <div className="pt-4 border-t border-[#4A0612]/10 flex items-center justify-between">

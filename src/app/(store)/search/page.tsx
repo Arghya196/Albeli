@@ -3,26 +3,31 @@
 import { useState, useMemo } from "react";
 import { Search as SearchIcon, X } from "lucide-react";
 import { ProductCard } from "@/components/store/ProductCard";
-import { PLACEHOLDER_PRODUCTS } from "@/lib/placeholder-data";
+import { useAdminStore } from "@/lib/store/adminStore";
+import { PLACEHOLDER_PRODUCTS, type PlaceholderProduct } from "@/lib/placeholder-data";
 
 const POPULAR_SEARCHES = ["Chandbali", "Polki", "Choker", "Jhumka", "Hasli", "Ring", "Festive", "Saree"];
 
 export default function SearchPage() {
   const [query, setQuery] = useState("");
+  const storeProducts = useAdminStore((s) => s.products);
+  const products: PlaceholderProduct[] =
+    storeProducts && storeProducts.length > 0 ? storeProducts : PLACEHOLDER_PRODUCTS;
 
   const searchResults = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return [];
 
-    return PLACEHOLDER_PRODUCTS.filter((product) => {
+    return products.filter((product: PlaceholderProduct) => {
       return (
         product.name.toLowerCase().includes(q) ||
         product.category.toLowerCase().includes(q) ||
+        (product.subcategory && product.subcategory.toLowerCase().includes(q)) ||
         product.description.toLowerCase().includes(q) ||
-        product.outfitPairings.some((tag) => tag.toLowerCase().includes(q))
+        product.outfitPairings.some((tag: string) => tag.toLowerCase().includes(q))
       );
     });
-  }, [query]);
+  }, [products, query]);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16 min-h-[60vh]">
@@ -110,7 +115,7 @@ export default function SearchPage() {
             </h2>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
-            {PLACEHOLDER_PRODUCTS.slice(0, 4).map((p) => (
+            {products.slice(0, 4).map((p: PlaceholderProduct) => (
               <ProductCard key={p.id} product={p} />
             ))}
           </div>

@@ -126,9 +126,19 @@ export function ProductDetailClient({ slug }: { slug: string }) {
     }
   };
 
-  // Related products (exclude current)
+  // Related products (prioritize same subcategory, then same category)
   const pool = adminProducts && adminProducts.length > 0 ? adminProducts : PLACEHOLDER_PRODUCTS;
-  const relatedProducts = pool.filter((p) => p.id !== product.id).slice(0, 4);
+  const sameSub = pool.filter(
+    (p) => p.id !== product.id && p.subcategorySlug && p.subcategorySlug === product.subcategorySlug
+  );
+  const sameCat = pool.filter(
+    (p) =>
+      p.id !== product.id &&
+      p.categorySlug === product.categorySlug &&
+      (!p.subcategorySlug || p.subcategorySlug !== product.subcategorySlug)
+  );
+  const other = pool.filter((p) => p.id !== product.id && p.categorySlug !== product.categorySlug);
+  const relatedProducts = [...sameSub, ...sameCat, ...other].slice(0, 4);
 
   // JSON-LD structured data for rich Google Shopping snippets
   const productJsonLd = {
@@ -176,7 +186,7 @@ export function ProductDetailClient({ slug }: { slug: string }) {
       />
 
       {/* Breadcrumb Navigation */}
-      <nav aria-label="Breadcrumb" className="flex items-center space-x-1.5 text-xs text-[#1E1A1A]/50 mb-3 sm:mb-6 font-sans">
+      <nav aria-label="Breadcrumb" className="flex items-center space-x-1.5 text-xs text-[#1E1A1A]/50 mb-3 sm:mb-6 font-sans flex-wrap gap-y-1">
         <Link href="/" className="hover:text-[#6B1F2E] transition-colors">
           Home
         </Link>
@@ -184,6 +194,24 @@ export function ProductDetailClient({ slug }: { slug: string }) {
         <Link href="/shop" className="hover:text-[#6B1F2E] transition-colors">
           Shop
         </Link>
+        <span>/</span>
+        <Link
+          href={`/shop?category=${product.categorySlug}`}
+          className="hover:text-[#6B1F2E] transition-colors"
+        >
+          {product.category}
+        </Link>
+        {product.subcategory && (
+          <>
+            <span>/</span>
+            <Link
+              href={`/shop?category=${product.categorySlug}&subcategory=${product.subcategorySlug}`}
+              className="text-[#6B1F2E] font-medium hover:underline transition-colors"
+            >
+              {product.subcategory}
+            </Link>
+          </>
+        )}
         <span>/</span>
         <span className="text-[#1E1A1A] font-medium truncate max-w-[180px] sm:max-w-none">
           {product.name}
@@ -355,10 +383,28 @@ export function ProductDetailClient({ slug }: { slug: string }) {
 
         {/* Right Column: Product Details & CTAs */}
         <div className="lg:col-span-5 flex flex-col justify-start">
-          {/* Category & SKU */}
-          <div className="flex items-center justify-between text-[11px] text-[#1E1A1A]/50 uppercase tracking-widest font-sans mb-1">
-            <span>{product.category}</span>
-            <span>SKU: {product.sku}</span>
+          {/* Category, Subcategory & SKU */}
+          <div className="flex items-center justify-between text-[11px] text-[#1E1A1A]/60 uppercase tracking-widest font-sans mb-1 flex-wrap gap-1">
+            <div className="flex items-center gap-1.5">
+              <Link
+                href={`/shop?category=${product.categorySlug}`}
+                className="hover:text-[#6B1F2E] transition-colors"
+              >
+                {product.category}
+              </Link>
+              {product.subcategory && (
+                <>
+                  <span className="text-[#1E1A1A]/30">›</span>
+                  <Link
+                    href={`/shop?category=${product.categorySlug}&subcategory=${product.subcategorySlug}`}
+                    className="text-[#6B1F2E] font-semibold hover:underline"
+                  >
+                    {product.subcategory}
+                  </Link>
+                </>
+              )}
+            </div>
+            <span className="font-mono text-[10px] text-[#1E1A1A]/40">SKU: {product.sku}</span>
           </div>
 
           {/* Title */}

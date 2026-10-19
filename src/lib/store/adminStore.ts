@@ -20,6 +20,9 @@ export interface AdminCategory {
   name: string;
   slug: string;
   itemCount: number;
+  parentId?: string | null;
+  description?: string;
+  imageUrl?: string;
 }
 
 export interface NavItem {
@@ -90,6 +93,198 @@ export const DEFAULT_HERO_SLIDES: HeroSlide[] = [
   },
 ];
 
+export const DEFAULT_CATEGORIES: AdminCategory[] = [
+  // Parent Categories
+  {
+    id: "cat-1",
+    name: "Earrings",
+    slug: "earrings",
+    itemCount: 5,
+    parentId: null,
+    description: "Handcrafted chandbalis, jhumkas, polki studs, and royal ear ornaments.",
+    imageUrl: "/images/product-1-a.jpg",
+  },
+  {
+    id: "cat-2",
+    name: "Necklaces",
+    slug: "necklaces",
+    itemCount: 2,
+    parentId: null,
+    description: "Sculpted heritage haslis, polki chokers, and royal bridal neckpieces.",
+    imageUrl: "/images/product-2-a.jpg",
+  },
+  {
+    id: "cat-3",
+    name: "Rings",
+    slug: "rings",
+    itemCount: 1,
+    parentId: null,
+    description: "Solar cocktail rings, polki bands, and adjustable statement pieces.",
+    imageUrl: "/images/product-3-a.jpg",
+  },
+  {
+    id: "cat-4",
+    name: "Bangles & Bracelets",
+    slug: "bangles-bracelets",
+    itemCount: 0,
+    parentId: null,
+    description: "Heritage peacock kadas, meenakari bangles, and delicate hathphool.",
+    imageUrl: "/images/product-5-a.jpg",
+  },
+
+  // Subcategories of Earrings
+  {
+    id: "sub-1",
+    name: "Chandbalis",
+    slug: "chandbalis",
+    itemCount: 1,
+    parentId: "cat-1",
+    description: "Crescent-shaped royal earrings adorned with meenakari and seed pearls.",
+    imageUrl: "/images/product-1-a.jpg",
+  },
+  {
+    id: "sub-2",
+    name: "Jhumkas",
+    slug: "jhumkas",
+    itemCount: 1,
+    parentId: "cat-1",
+    description: "Bell-shaped traditional drops finished with delicate micro-pearl fringe.",
+    imageUrl: "/images/product-4-a.jpg",
+  },
+  {
+    id: "sub-3",
+    name: "Studs & Tops",
+    slug: "studs-tops",
+    itemCount: 1,
+    parentId: "cat-1",
+    description: "Minimal polki and kundan solitaires crafted for all-day comfort.",
+    imageUrl: "/images/product-1-a.jpg",
+  },
+  {
+    id: "sub-4",
+    name: "Danglers & Drops",
+    slug: "danglers-drops",
+    itemCount: 1,
+    parentId: "cat-1",
+    description: "Cascading shoulder dusters with faceted emerald and ruby hydro beads.",
+    imageUrl: "/images/product-4-a.jpg",
+  },
+  {
+    id: "sub-5",
+    name: "Hoops & Balis",
+    slug: "hoops-balis",
+    itemCount: 1,
+    parentId: "cat-1",
+    description: "Intricately filigreed huggies and traditional round balis.",
+    imageUrl: "/images/product-1-a.jpg",
+  },
+  {
+    id: "sub-6",
+    name: "Ear Cuffs & Deewani",
+    slug: "ear-cuffs",
+    itemCount: 0,
+    parentId: "cat-1",
+    description: "Over-the-ear bridal statement wraps and delicate chain climbers.",
+    imageUrl: "/images/product-1-b.jpg",
+  },
+
+  // Subcategories of Necklaces
+  {
+    id: "sub-7",
+    name: "Chokers",
+    slug: "chokers",
+    itemCount: 1,
+    parentId: "cat-2",
+    description: "Heritage neck-hugging polki chokers with adjustable silk zari cords.",
+    imageUrl: "/images/product-2-a.jpg",
+  },
+  {
+    id: "sub-8",
+    name: "Haslis & Collars",
+    slug: "haslis-collars",
+    itemCount: 1,
+    parentId: "cat-2",
+    description: "Rigid sculpted collars engraved with peacock and floral repoussé motifs.",
+    imageUrl: "/images/product-5-a.jpg",
+  },
+  {
+    id: "sub-9",
+    name: "Long Malas & Haar",
+    slug: "long-malas",
+    itemCount: 0,
+    parentId: "cat-2",
+    description: "Layered royal malas featuring uncut glass polki and natural gemstone beads.",
+    imageUrl: "/images/product-2-b.jpg",
+  },
+  {
+    id: "sub-10",
+    name: "Pendant Sets",
+    slug: "pendant-sets",
+    itemCount: 0,
+    parentId: "cat-2",
+    description: "Minimalist everyday chains paired with matching artisan ear studs.",
+    imageUrl: "/images/product-2-a.jpg",
+  },
+
+  // Subcategories of Rings
+  {
+    id: "sub-11",
+    name: "Cocktail Rings",
+    slug: "cocktail-rings",
+    itemCount: 1,
+    parentId: "cat-3",
+    description: "Bold oversized solar and lotus statement pieces with doublet gemstones.",
+    imageUrl: "/images/product-3-a.jpg",
+  },
+  {
+    id: "sub-12",
+    name: "Bands & Solitaires",
+    slug: "band-solitaire",
+    itemCount: 0,
+    parentId: "cat-3",
+    description: "Understated daily wear rings featuring uncut glass stones.",
+    imageUrl: "/images/product-3-b.jpg",
+  },
+  {
+    id: "sub-13",
+    name: "Adjustable Rings",
+    slug: "adjustable-rings",
+    itemCount: 0,
+    parentId: "cat-3",
+    description: "Comfort-fit open band rings designed to fit any finger size.",
+    imageUrl: "/images/product-3-a.jpg",
+  },
+
+  // Subcategories of Bangles & Bracelets
+  {
+    id: "sub-14",
+    name: "Kadas & Cuffs",
+    slug: "kadas",
+    itemCount: 0,
+    parentId: "cat-4",
+    description: "Heavy antique openable cuffs with lion and peacock terminal heads.",
+    imageUrl: "/images/product-5-a.jpg",
+  },
+  {
+    id: "sub-15",
+    name: "Meenakari Bangles",
+    slug: "meenakari-bangles",
+    itemCount: 0,
+    parentId: "cat-4",
+    description: "Vibrant enameled bangles displaying traditional floral motifs.",
+    imageUrl: "/images/product-4-a.jpg",
+  },
+  {
+    id: "sub-16",
+    name: "Hathphool",
+    slug: "hathphool",
+    itemCount: 0,
+    parentId: "cat-4",
+    description: "Delicate bridal hand harness connecting ring to wrist.",
+    imageUrl: "/images/product-3-a.jpg",
+  },
+];
+
 export interface SiteSettingsData {
   whatsappNumber: string;
   instagramHandle: string;
@@ -122,7 +317,14 @@ interface AdminState {
   updateEnquiryStatus: (id: string, status: AdminEnquiry["status"]) => void;
   addEnquiry: (enquiry: Omit<AdminEnquiry, "id">) => void;
 
-  addCategory: (name: string, slug: string) => void;
+  addCategory: (
+    name: string,
+    slug: string,
+    parentId?: string | null,
+    description?: string,
+    imageUrl?: string
+  ) => void;
+  updateCategory: (id: string, updates: Partial<AdminCategory>) => void;
   deleteCategory: (id: string) => void;
 
   updateSettings: (updates: Partial<SiteSettingsData>) => void;
@@ -172,12 +374,7 @@ export const useAdminStore = create<AdminState>()(
         },
       ],
 
-      categories: [
-        { id: "cat-1", name: "Earrings", slug: "earrings", itemCount: 4 },
-        { id: "cat-2", name: "Necklaces", slug: "necklaces", itemCount: 3 },
-        { id: "cat-3", name: "Rings", slug: "rings", itemCount: 2 },
-        { id: "cat-4", name: "Chokers", slug: "chokers", itemCount: 2 },
-      ],
+      categories: DEFAULT_CATEGORIES,
 
       settings: {
         whatsappNumber: "+91XXXXXXXXXX",
@@ -292,16 +489,33 @@ export const useAdminStore = create<AdminState>()(
         });
       },
 
-      addCategory: (name, slug) => {
-        const id = `cat-${Date.now().toString().slice(-4)}`;
+      addCategory: (name, slug, parentId = null, description = "", imageUrl = "") => {
+        const id = parentId ? `sub-${Date.now().toString().slice(-4)}` : `cat-${Date.now().toString().slice(-4)}`;
         set({
-          categories: [...get().categories, { id, name, slug, itemCount: 0 }],
+          categories: [
+            ...get().categories,
+            {
+              id,
+              name,
+              slug,
+              parentId: parentId || null,
+              itemCount: 0,
+              description,
+              imageUrl,
+            },
+          ],
+        });
+      },
+
+      updateCategory: (id, updates) => {
+        set({
+          categories: get().categories.map((c) => (c.id === id ? { ...c, ...updates } : c)),
         });
       },
 
       deleteCategory: (id) => {
         set({
-          categories: get().categories.filter((c) => c.id !== id),
+          categories: get().categories.filter((c) => c.id !== id && c.parentId !== id),
         });
       },
 
@@ -339,7 +553,7 @@ export const useAdminStore = create<AdminState>()(
       },
     }),
     {
-      name: "albeli_admin_store_v1",
+      name: "albeli_admin_store_v2",
       storage: createJSONStorage(() => {
         if (typeof window !== "undefined") return localStorage;
         return {
