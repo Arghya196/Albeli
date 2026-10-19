@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Cormorant_Garamond, DM_Sans, Tiro_Devanagari_Hindi } from "next/font/google";
+import { StoreSync } from "@/components/common/StoreSync";
 import "./globals.css";
 
 // ── Brand Fonts ──────────────────────────────────
@@ -175,6 +176,7 @@ export default function RootLayout({
         <link rel="mask-icon" href="/safari-pinned-tab.svg?v=4" color="#4A0612" />
       </head>
       <body className="min-h-full flex flex-col">
+        <StoreSync />
         {children}
       </body>
     </html>
